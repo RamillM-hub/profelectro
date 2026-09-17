@@ -1,0 +1,15 @@
+{
+  "name": "ПрофЭлектро — Заказ-наряд",
+  "short_name": "Заказ-наряд",
+  "description": "Заполнение заказ-наряда с записью в Google Таблицу",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F2F2F7",
+  "theme_color": "#323944",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

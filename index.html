@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F2F2F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>ПрофЭлектро — Заказ-наряд</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<style>
+  :root{
+    --bg:#F2F2F7;
+    --card:#FFFFFF;
+    --label:#1C1C1E;
+    --secondary:#8E8E93;
+    --tertiary:#C7C7CC;
+    --separator:#E5E5EA;
+    --accent:#2E9FD6;
+    --accent-tint:#EAF7FE;
+    --ink:#323944;
+    --danger:#FF3B30;
+    --radius:14px;
+    --sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Roboto, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--sf);
+    background:#0b0b0d;
+    color:var(--label);
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+    min-height:100dvh;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    min-height:100dvh;
+    height:100vh;
+    height:100dvh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    padding-top:env(safe-area-inset-top,0px);
+    background:rgba(242,242,247,0.78);
+    backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    flex-shrink:0;
+  }
+  .navbar-inner{
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    padding:0 12px;
+  }
+  .nav-title{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--label);
+    opacity:0;
+    transform:translateY(4px);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .nav-title.show{opacity:1;transform:translateY(0);}
+  .nav-back{
+    position:absolute; left:4px; top:0; bottom:0;
+    display:flex; align-items:center; gap:2px;
+    padding:0 8px;
+    color:var(--accent);
+    font-size:16.5px;
+    font-weight:400;
+    background:none; border:none; font-family:var(--sf);
+  }
+  .nav-back:active{opacity:0.4;}
+  .nav-back svg{width:11px;height:18px;}
+  .nav-profile{
+    position:absolute; right:6px; top:0; bottom:0; margin:auto 0;
+    width:30px;height:30px;border-radius:50%;
+    background:rgba(46,159,214,0.12);
+    border:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-profile:active{opacity:0.5;}
+  .nav-profile svg{width:18px;height:18px;}
+  #pendingBadge{
+    position:absolute; top:-3px; right:-3px;
+    min-width:16px; height:16px; padding:0 3px;
+    border-radius:8px; background:#FF9500; color:#fff;
+    font-size:9.5px; font-weight:700; line-height:16px; text-align:center;
+    align-items:center; justify-content:center;
+    border:1.5px solid var(--bg);
+  }
+  .progress-track{height:2.5px;background:var(--separator);position:relative;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--accent);transition:width .35s cubic-bezier(.4,0,.2,1);}
+
+  main{flex:1;overflow-y:auto;padding:0 16px 20px;-webkit-overflow-scrolling:touch;}
+  .brand-row{
+    display:flex; align-items:center; gap:9px;
+    padding:16px 4px 2px;
+    color:var(--ink);
+    font-size:16px;
+    font-weight:650;
+    letter-spacing:0.005em;
+  }
+  .logo-mark{
+    width:26px;height:26px;flex-shrink:0;
+    display:block;
+    border-radius:6px;
+  }
+  .large-title{
+    font-size:32px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    color:var(--label);
+    padding:6px 4px 4px;
+  }
+  .large-sub{
+    font-size:14px;
+    color:var(--secondary);
+    padding:2px 4px 18px;
+    line-height:1.4;
+  }
+
+  .step-wrap{animation:iosIn .32s cubic-bezier(.22,1,.36,1);}
+  @media (prefers-reduced-motion:reduce){ .step-wrap{animation:none;} }
+  @keyframes iosIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .group-label{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    color:var(--secondary);
+    padding:0 16px 6px;
+    margin-top:22px;
+  }
+  .group-label:first-child{margin-top:0;}
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 1px 1px rgba(0,0,0,0.02);
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 16px;
+    min-height:46px;
+    position:relative;
+    background:var(--card);
+  }
+  .row + .row{border-top:0.5px solid var(--separator);}
+  .row.tappable{cursor:pointer;transition:background .1s;}
+  .row.tappable:active{background:#F0F0F2;}
+  .row-label{font-size:17px;color:var(--label);}
+  .row-sub{font-size:12.5px;color:var(--secondary);margin-top:1px;}
+  .row-check{
+    width:22px;height:22px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .row-check svg{width:22px;height:22px;display:none;}
+  .row.selected .row-check svg{display:block;}
+  .row.selected .row-label{color:var(--accent);font-weight:590;}
+
+  .field-card{padding:10px 16px 12px;}
+  .field-cap{font-size:13px;color:var(--secondary);margin-bottom:2px;}
+  input[type=text], input[type=number], textarea{
+    width:100%;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-size:17px;
+    color:var(--label);
+    font-family:var(--sf);
+    padding:2px 0;
+  }
+  textarea{resize:none;min-height:66px;line-height:1.35;}
+  input::placeholder, textarea::placeholder{color:var(--tertiary);}
+  .hint{font-size:12.5px;color:var(--secondary);padding:8px 4px 0;line-height:1.4;}
+
+  .review-row .k{font-size:15px;color:var(--secondary);}
+  .review-row .v{font-size:15px;color:var(--label);font-weight:590;text-align:right;max-width:60%;}
+
+  .center-msg{display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 16px 12px;gap:14px;}
+  .check-badge{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    animation:pop .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop{0%{transform:scale(0.6);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .check-badge svg{width:30px;height:30px;}
+  .center-msg h2{font-size:22px;font-weight:700;letter-spacing:-0.01em;color:var(--label);}
+  .center-msg p{font-size:14.5px;color:var(--secondary);line-height:1.5;max-width:280px;}
+
+  .loading-rows{display:flex;align-items:center;gap:10px;color:var(--secondary);font-size:14.5px;padding:16px 4px;}
+  .retry-link{color:var(--accent);font-weight:600;background:none;border:none;font-size:14.5px;padding:10px 4px;}
+
+  footer{
+    padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
+    background:rgba(242,242,247,0.78);
+    backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    border-top:0.5px solid var(--separator);
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .btn{
+    width:100%;
+    border:none;
+    border-radius:14px;
+    padding:15px;
+    font-weight:600;
+    font-size:17px;
+    font-family:var(--sf);
+    letter-spacing:-0.01em;
+    transition:transform .1s, opacity .1s;
+  }
+  .btn:active{transform:scale(0.98);opacity:0.85;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:disabled{background:var(--tertiary);}
+  .btn-secondary{background:rgba(120,120,128,0.12);color:var(--accent);}
+  .btn-plain{background:none;color:var(--secondary);padding:6px;font-size:13.5px;font-weight:500;}
+
+  .error-banner{
+    background:#FFEBEA;color:var(--danger);font-size:13px;
+    border-radius:10px;padding:10px 12px;margin-top:14px;display:none;
+    text-align:center;
+  }
+  .error-banner.show{display:block;}
+
+  .spinner{
+    width:16px;height:16px;border-radius:50%;
+    border:2px solid rgba(255,255,255,0.45);border-top-color:#fff;
+    animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:7px;
+  }
+  .spinner-dark{border:2px solid var(--separator);border-top-color:var(--accent);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .crash{padding:34px 4px;}
+  .crash h2{font-size:22px;font-weight:700;margin-bottom:10px;}
+  .crash p{font-size:14.5px;color:var(--secondary);line-height:1.5;margin-bottom:16px;}
+  .crash pre{
+    background:#fff;border-radius:12px;padding:12px 14px;font-size:11.5px;
+    color:#8A3A32;white-space:pre-wrap;word-break:break-word;overflow-x:auto;
+    border:1px solid var(--separator);margin-bottom:18px;max-height:180px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="navbar">
+    <div class="navbar-inner">
+      <button class="nav-back" id="navBack" style="display:none;">
+        <svg viewBox="0 0 11 18" fill="none"><path d="M10 1L2 9L10 17" stroke="#2E9FD6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Назад
+      </button>
+      <div class="nav-title" id="navTitle">Заказ-наряд</div>
+      <button class="nav-profile" id="navProfile" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.2" r="3.4" stroke="#2E9FD6" stroke-width="1.8"/><path d="M4.8 19c1.2-3.4 4-5.2 7.2-5.2s6 1.8 7.2 5.2" stroke="#2E9FD6" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span id="pendingBadge" style="display:none;"></span>
+      </button>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <main id="mainArea"></main>
+
+  <footer id="footerArea"></footer>
+</div>
+
+<script>
+/* ===================== НАСТРОЙКИ ===================== */
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycbybIzigZF7X0U7pAwp3p5fuNyynpBcDoi8kAY5Gl8qzKQrd5E-IwDVEFcAt9cZNTqFAew/exec",
+};
+
+/* ===================== ПРОФИЛЬ (localStorage) ===================== */
+const PROFILE_KEY = "pe_profile_v1";
+
+function loadProfile(){
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    if (!p || typeof p !== "object") return null;
+    const fio = typeof p.fio === "string" ? p.fio.trim() : "";
+    if (!fio) return null;
+    return { fio, position: typeof p.position === "string" ? p.position : "" };
+  } catch(e){
+    try { localStorage.removeItem(PROFILE_KEY); } catch(_){}
+    return null;
+  }
+}
+function saveProfile(p){
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch(e){}
+}
+
+let profile = loadProfile();
+let previousStep = "date";
+let lastWasQueued = false;
+function makeRequestId(){
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+}
+
+/* ===================== СОСТОЯНИЕ ===================== */
+let step = profile ? "date" : "register";
+let data = {
+  date: todayStr(), orderNumber:"", orderLabel:"",
+  equipment:"", operation:"", duration:"",
+  requestId: null,
+};
+let opsCount = 0;
+
+/* Список заказов, полученный с сервера. Кэшируем на время сессии. */
+let ordersData = null;      // null = ещё не загружали
+let ordersError = null;
+let ordersLoading = false;
+
+function todayStr(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
+}
+
+const mainArea = document.getElementById("mainArea");
+const footerArea = document.getElementById("footerArea");
+const navTitle = document.getElementById("navTitle");
+const navBack = document.getElementById("navBack");
+const navProfile = document.getElementById("navProfile");
+const progressFill = document.getElementById("progressFill");
+
+navProfile.onclick = () => { previousStep = step; goTo("profile"); };
+
+const PROGRESS_STEPS = ["date","order","equipment","operation","time"];
+const BACK_MAP = { order:"date", equipment:"order",
+  operation:"equipment", time:"operation", confirm:"time" };
+
+function progressIndex(){
+  if (step === "confirm") return PROGRESS_STEPS.length - 1;
+  return PROGRESS_STEPS.indexOf(step);
+}
+
+function setNav(title){
+  if (step === "register"){
+    navTitle.classList.remove("show"); navBack.style.display = "none";
+    navProfile.style.display = "none"; progressFill.style.width = "0%";
+    return;
+  }
+  if (step === "done"){
+    navTitle.classList.remove("show"); navBack.style.display = "none";
+    navProfile.style.display = "flex"; progressFill.style.width = "0%";
+    return;
+  }
+  if (step === "profile"){
+    navTitle.textContent = "Профиль"; navTitle.classList.add("show");
+    navBack.style.display = "flex";
+    navBack.onclick = () => goTo(previousStep || "done");
+    navProfile.style.display = "none";
+    progressFill.style.width = "0%";
+    return;
+  }
+  navTitle.textContent = title;
+  navTitle.classList.add("show");
+  const target = BACK_MAP[step];
+  navBack.style.display = target ? "flex" : "none";
+  navBack.onclick = () => target && goTo(target);
+  navProfile.style.display = "flex";
+  const idx = progressIndex();
+  progressFill.style.width = ((idx+1)/PROGRESS_STEPS.length*100) + "%";
+}
+
+function goTo(next){ step = next; render(); mainArea.scrollTop = 0; }
+
+/* ===================== РЕНДЕР ===================== */
+function render(){
+  mainArea.innerHTML = "";
+  footerArea.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.className = "step-wrap";
+  mainArea.appendChild(wrap);
+
+  if (step === "register") return renderRegister(wrap);
+  if (step === "profile") return renderProfile(wrap);
+  if (step === "date") return renderDate(wrap);
+  if (step === "order") return renderOrder(wrap);
+  if (step === "equipment") return renderEquipment(wrap);
+  if (step === "operation") return renderOperation(wrap);
+  if (step === "time") return renderTime(wrap);
+  if (step === "confirm") return renderConfirm(wrap);
+  if (step === "done") return renderDone(wrap);
+}
+
+function brandRow(wrap){
+  const b = document.createElement("div");
+  b.className = "brand-row";
+  b.innerHTML = '<img class="logo-mark" src="./icons/icon-192.png" alt=""><span>ПрофЭлектро</span>';
+  wrap.appendChild(b);
+}
+
+function largeTitle(wrap, title, sub){
+  const h = document.createElement("div");
+  h.className = "large-title";
+  h.textContent = title;
+  wrap.appendChild(h);
+  if (sub){
+    const s = document.createElement("div");
+    s.className = "large-sub";
+    s.textContent = sub;
+    wrap.appendChild(s);
+  }
+}
+
+function fieldCard(wrap, caption, inputEl){
+  const card = document.createElement("div");
+  card.className = "card field-card";
+  const cap = document.createElement("div");
+  cap.className = "field-cap";
+  cap.textContent = caption;
+  card.appendChild(cap);
+  card.appendChild(inputEl);
+  wrap.appendChild(card);
+  return inputEl;
+}
+
+function checkSvg(){
+  return '<svg viewBox="0 0 24 24" fill="none"><path d="M6 12.5L10 16.5L18 8" stroke="#2E9FD6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function primaryBtn(label, onClick, disabled){
+  const btn = document.createElement("button");
+  btn.className = "btn btn-primary";
+  btn.textContent = label;
+  btn.disabled = !!disabled;
+  btn.onclick = onClick;
+  footerArea.appendChild(btn);
+  return btn;
+}
+function secondaryBtn(label, onClick){
+  const btn = document.createElement("button");
+  btn.className = "btn btn-secondary";
+  btn.textContent = label;
+  btn.onclick = onClick;
+  footerArea.appendChild(btn);
+  return btn;
+}
+
+/* ---- Регистрация (один раз) ---- */
+function renderRegister(wrap){
+  setNav("");
+  brandRow(wrap);
+  largeTitle(wrap, "Регистрация", "Укажите ФИО и должность один раз — дальше они будут подставляться автоматически");
+  const fioInput = document.createElement("input");
+  fioInput.type = "text"; fioInput.placeholder = "Иванов Иван Иванович";
+  fieldCard(wrap, "ФИО", fioInput);
+  const posInput = document.createElement("input");
+  posInput.type = "text"; posInput.placeholder = "Слесарь-Электромонтажник 5 разряда";
+  fieldCard(wrap, "Должность", posInput);
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.textContent = "Укажите минимум фамилию и имя — отчество не обязательно.";
+  wrap.appendChild(hint);
+  primaryBtn("Продолжить", () => {
+    const fio = fioInput.value.trim();
+    const position = posInput.value.trim();
+    const words = fio.split(/\s+/).filter(Boolean);
+    if (words.length < 2) { fioInput.focus(); return; }
+    if (!position) { posInput.focus(); return; }
+    profile = { fio, position };
+    saveProfile(profile);
+    goTo("date");
+  });
+  setTimeout(()=>fioInput.focus(), 250);
+}
+
+/* ---- Профиль (просмотр/редактирование) ---- */
+function renderProfile(wrap){
+  setNav("Профиль");
+  largeTitle(wrap, "Профиль");
+  const fioInput = document.createElement("input");
+  fioInput.type = "text"; fioInput.value = profile.fio;
+  fieldCard(wrap, "ФИО", fioInput);
+  const posInput = document.createElement("input");
+  posInput.type = "text"; posInput.value = profile.position;
+  fieldCard(wrap, "Должность", posInput);
+  primaryBtn("Сохранить", () => {
+    const fio = fioInput.value.trim();
+    const position = posInput.value.trim();
+    const words = fio.split(/\s+/).filter(Boolean);
+    if (words.length < 2) { fioInput.focus(); return; }
+    if (!position) { posInput.focus(); return; }
+    profile = { fio, position };
+    saveProfile(profile);
+    goTo(previousStep || "done");
+  });
+}
+
+/* ---- Дата ---- */
+function renderDate(wrap){
+  setNav("Дата");
+  brandRow(wrap);
+  largeTitle(wrap, "Дата");
+  const input = document.createElement("input");
+  input.type = "text"; input.placeholder = "19.11.2025"; input.value = data.date;
+  fieldCard(wrap, "Дата (ДД.ММ.ГГГГ)", input);
+  primaryBtn("Далее", () => {
+    data.date = input.value.trim();
+    if (!data.date) { input.focus(); return; }
+    goTo("order");
+  });
+}
+
+/* ---- Номер заказа (список из Google Таблицы) ---- */
+function renderOrder(wrap){
+  setNav(opsCount === 0 ? "Номер заказа" : `Операция №${opsCount+1}`);
+  brandRow(wrap);
+  largeTitle(wrap, "Номер заказа", "Выберите заказ из списка");
+
+  if (ordersLoading){
+    const l = document.createElement("div");
+    l.className = "loading-rows";
+    l.innerHTML = '<span class="spinner spinner-dark"></span>Загружаю список заказов…';
+    wrap.appendChild(l);
+    return;
+  }
+
+  if (ordersError){
+    const l = document.createElement("div");
+    l.className = "hint";
+    l.textContent = "Не удалось загрузить список заказов: " + ordersError;
+    wrap.appendChild(l);
+    const retry = document.createElement("button");
+    retry.className = "retry-link";
+    retry.textContent = "Повторить попытку";
+    retry.onclick = () => { loadOrders(true); };
+    wrap.appendChild(retry);
+    return;
+  }
+
+  const card = document.createElement("div"); card.className = "card";
+  (ordersData || []).forEach(o => {
+    const row = document.createElement("div");
+    row.className = "row tappable" + (data.orderNumber === o.number ? " selected" : "");
+    row.innerHTML = `<span class="row-label">${escapeHtml(o.label)}</span><span class="row-check">${checkSvg()}</span>`;
+    row.onclick = () => {
+      data.orderNumber = o.number;
+      data.orderLabel = o.label;
+      data.equipment = "";
+      goTo("order");
+    };
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+
+  if (!ordersData || ordersData.length === 0){
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    hint.textContent = "Список пуст — либо все заказы скрыты, либо в таблице нет данных.";
+    wrap.appendChild(hint);
+  }
+
+  primaryBtn("Далее", () => { if (data.orderNumber) goTo("equipment"); }, !data.orderNumber);
+}
+
+/* ---- Оборудование (список зависит от выбранного заказа) ---- */
+function renderEquipment(wrap){
+  setNav("Оборудование");
+  brandRow(wrap);
+  largeTitle(wrap, "Оборудование", data.orderLabel);
+
+  const order = (ordersData || []).find(o => o.number === data.orderNumber);
+  const list = order ? order.equipment : [];
+
+  const card = document.createElement("div"); card.className = "card";
+  list.forEach(name => {
+    const row = document.createElement("div");
+    row.className = "row tappable" + (data.equipment === name ? " selected" : "");
+    row.innerHTML = `<span class="row-label">${escapeHtml(name)}</span><span class="row-check">${checkSvg()}</span>`;
+    row.onclick = () => { data.equipment = name; goTo("equipment"); };
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+
+  primaryBtn("Далее", () => { if (data.equipment) goTo("operation"); }, !data.equipment);
+}
+
+/* ---- Операция ---- */
+function renderOperation(wrap){
+  setNav("Операция");
+  brandRow(wrap);
+  largeTitle(wrap, "Операция");
+  const input = document.createElement("textarea");
+  input.placeholder = "Электромонтаж монтажной панели ЩСН"; input.value = data.operation;
+  fieldCard(wrap, "Описание операции", input);
+  primaryBtn("Далее", () => {
+    data.operation = input.value.trim();
+    if (!data.operation) { input.focus(); return; }
+    goTo("time");
+  });
+  setTimeout(()=>input.focus(), 250);
+}
+
+/* ---- Время выполнения ---- */
+function renderTime(wrap){
+  setNav("Время");
+  brandRow(wrap);
+  largeTitle(wrap, "Время выполнения");
+  const input = document.createElement("input");
+  input.type = "text"; input.placeholder = "11"; input.value = data.duration;
+  fieldCard(wrap, "Время на весь объём операции", input);
+  primaryBtn("Далее", () => {
+    data.duration = input.value.trim();
+    if (!data.duration) { input.focus(); return; }
+    goTo("confirm");
+  });
+  setTimeout(()=>input.focus(), 250);
+}
+
+/* ---- Подтверждение ---- */
+function renderConfirm(wrap){
+  setNav("Проверка");
+  brandRow(wrap);
+  largeTitle(wrap, "Проверьте данные", "Перед отправкой в таблицу");
+  const card = document.createElement("div"); card.className = "card";
+  [["ФИО", profile.fio],["Дата", data.date],["Номер заказа", data.orderLabel || data.orderNumber],
+   ["Оборудование", data.equipment],["Операция", data.operation],["Время выполнения", data.duration]]
+  .forEach(([k,v]) => {
+    const row = document.createElement("div"); row.className = "row review-row";
+    row.innerHTML = `<span class="k">${k}</span><span class="v">${escapeHtml(v)}</span>`;
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+
+  const errorBanner = document.createElement("div");
+  errorBanner.className = "error-banner"; errorBanner.id = "errorBanner";
+  errorBanner.textContent = "Не удалось сохранить после нескольких попыток. Проверьте связь и попробуйте ещё раз.";
+  wrap.appendChild(errorBanner);
+
+  const btn = primaryBtn("Отправить", () => submitRow(btn));
+}
+
+async function attemptSend(payload, timeoutMs){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs || 8000);
+  try {
+    const res = await fetch(CONFIG.API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error("bad status " + res.status);
+    const json = await res.json().catch(() => null);
+    if (json && json.ok === false) throw new Error(json.error || "server error");
+    return true;
+  } catch (e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/* ---------- Офлайн-очередь ---------- */
+const QUEUE_KEY = "pe_pending_queue_v1";
+function loadQueue(){
+  try {
+    const parsed = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(it => it && typeof it === "object" && it.payload);
+  } catch(e){
+    try { localStorage.removeItem(QUEUE_KEY); } catch(_){}
+    return [];
+  }
+}
+function saveQueue(arr){ try { localStorage.setItem(QUEUE_KEY, JSON.stringify(arr)); } catch(e){} }
+function enqueuePending(payload){
+  const q = loadQueue();
+  q.push({ payload, addedAt: Date.now() });
+  saveQueue(q);
+  updatePendingBadge();
+}
+async function flushQueue(){
+  let q = loadQueue();
+  if (!q.length) { updatePendingBadge(); return; }
+  const remaining = [];
+  for (const item of q){
+    try { await attemptSend(item.payload, 8000); }
+    catch(e){ remaining.push(item); }
+  }
+  saveQueue(remaining);
+  updatePendingBadge();
+}
+function updatePendingBadge(){
+  const badge = document.getElementById("pendingBadge");
+  if (!badge) return;
+  const n = loadQueue().length;
+  if (n > 0){ badge.style.display = "flex"; badge.textContent = n > 9 ? "9+" : String(n); }
+  else { badge.style.display = "none"; }
+}
+window.addEventListener("online", flushQueue);
+window.addEventListener("load", flushQueue);
+setInterval(() => { if (navigator.onLine) flushQueue(); }, 25000);
+
+function escapeHtml(str){ const d=document.createElement("div"); d.textContent=str; return d.innerHTML; }
+
+async function submitRow(btn){
+  const errorBanner = document.getElementById("errorBanner");
+  errorBanner.classList.remove("show");
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+
+  if (!data.requestId) data.requestId = makeRequestId();
+  const payload = {
+    requestId: data.requestId,
+    fio: profile.fio,
+    date: data.date,
+    orderNumber: data.orderNumber,
+    equipment: data.equipment,
+    operation: data.operation,
+    duration: data.duration,
+  };
+
+  const DELAYS = [0, 1200, 2500, 4500];
+  for (let i = 0; i < DELAYS.length; i++){
+    if (DELAYS[i] > 0){ await sleep(DELAYS[i]); }
+    btn.innerHTML = '<span class="spinner"></span>Сохраняем…';
+    try {
+      await attemptSend(payload, 8000);
+      data.requestId = null;
+      opsCount++;
+      goTo("done");
+      return;
+    } catch (e) { /* пробуем ещё раз */ }
+  }
+
+  if (!navigator.onLine) {
+    enqueuePending(payload);
+    data.requestId = null;
+    opsCount++;
+    lastWasQueued = true;
+    goTo("done");
+  } else {
+    errorBanner.classList.add("show");
+    btn.disabled = false; btn.textContent = originalLabel;
+  }
+}
+
+/* ---- Готово ---- */
+function renderDone(wrap){
+  setNav("");
+  brandRow(wrap);
+  const msg = document.createElement("div"); msg.className = "center-msg";
+  const queued = lastWasQueued; lastWasQueued = false;
+  msg.innerHTML = queued ? `
+    <div class="check-badge" style="background:#8E8E93;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 7v5l3.2 3.2" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.4" stroke="#fff" stroke-width="2"/></svg></div>
+    <h2>Сохранено на телефоне</h2>
+    <p>Связи сейчас нет — заказ ${escapeHtml(data.orderLabel || data.orderNumber)} отправится в таблицу автоматически, как только интернет появится. Можно продолжать работу.</p>
+  ` : `
+    <div class="check-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17.5L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h2>Операция добавлена</h2>
+    <p>Заказ ${escapeHtml(data.orderLabel || data.orderNumber)} сохранён в таблице. Есть ещё операции по этому заказ-наряду?</p>
+  `;
+  wrap.appendChild(msg);
+
+  const profileLink = document.createElement("button");
+  profileLink.className = "btn btn-plain";
+  profileLink.textContent = `Профиль: ${profile.fio} · изменить`;
+  profileLink.onclick = () => { previousStep = "done"; goTo("profile"); };
+  wrap.appendChild(profileLink);
+
+  secondaryBtn("Ещё операция", () => {
+    data.orderNumber=""; data.orderLabel=""; data.equipment="";
+    data.operation=""; data.duration=""; data.requestId=null;
+    goTo("order");
+  });
+  primaryBtn("Завершить", () => {
+    data = { date: todayStr(), orderNumber:"", orderLabel:"", equipment:"", operation:"", duration:"", requestId:null };
+    opsCount = 0;
+    goTo("date");
+  });
+}
+
+/* ===================== ЗАГРУЗКА ЗАКАЗОВ ===================== */
+async function loadOrders(force){
+  if (ordersLoading) return;
+  if (ordersData && !force) return;
+  ordersLoading = true;
+  ordersError = null;
+  if (step === "order") render();
+
+  try {
+    const url = CONFIG.API_URL + (CONFIG.API_URL.indexOf("?") === -1 ? "?" : "&") + "action=orders";
+    const res = await fetch(url, { method: "GET" });
+    if (!res.ok) throw new Error("bad status " + res.status);
+    const json = await res.json();
+    if (!json || json.ok === false) throw new Error((json && json.error) || "неизвестная ошибка сервера");
+    ordersData = Array.isArray(json.orders) ? json.orders : [];
+  } catch (e) {
+    ordersError = (e && e.message) ? e.message : String(e);
+  } finally {
+    ordersLoading = false;
+    if (step === "order") render();
+  }
+}
+
+/* ===================== АВАРИЙНЫЙ ЭКРАН ===================== */
+function showCrash(err){
+  try {
+    const details = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
+    mainArea.innerHTML = "";
+    footerArea.innerHTML = "";
+    const box = document.createElement("div");
+    box.className = "crash";
+    box.innerHTML = `
+      <h2>Приложение не смогло запуститься</h2>
+      <p>Скорее всего, сохранённые на телефоне данные повреждены или загрузилась устаревшая версия. Нажмите кнопку ниже — это очистит локальные данные и перезагрузит приложение.</p>
+      <pre></pre>
+    `;
+    box.querySelector("pre").textContent = details;
+    mainArea.appendChild(box);
+
+    const reset = document.createElement("button");
+    reset.className = "btn btn-primary";
+    reset.textContent = "Сбросить данные и перезагрузить";
+    reset.onclick = hardReset;
+    footerArea.appendChild(reset);
+
+    const reloadOnly = document.createElement("button");
+    reloadOnly.className = "btn btn-secondary";
+    reloadOnly.textContent = "Просто перезагрузить";
+    reloadOnly.onclick = () => location.reload();
+    footerArea.appendChild(reloadOnly);
+  } catch(_) {
+    document.body.innerHTML =
+      '<div style="padding:24px;font:15px -apple-system,sans-serif">Ошибка запуска приложения. ' +
+      'Очистите данные сайта в настройках браузера и откройте страницу заново.</div>';
+  }
+}
+
+async function hardReset(){
+  try { localStorage.removeItem(PROFILE_KEY); } catch(_){}
+  try { localStorage.removeItem(QUEUE_KEY); } catch(_){}
+  try {
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if (window.caches) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch(_){}
+  location.replace(location.pathname + "?reset=" + Date.now());
+}
+
+window.addEventListener("error", (e) => { showCrash(e.error || e.message); });
+window.addEventListener("unhandledrejection", (e) => { showCrash(e.reason); });
+
+/* ===================== СТАРТ ===================== */
+try {
+  render();
+  loadOrders();
+} catch (err) {
+  showCrash(err);
+}
+
+/* ===================== SERVICE WORKER ===================== */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("./sw.js", { scope: "./" })
+    .then(reg => { if (reg && reg.update) reg.update(); })
+    .catch(() => { /* без SW приложение работает как обычная страница */ });
+}
+</script>
+</body>
+</html>
