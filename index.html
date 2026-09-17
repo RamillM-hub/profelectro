@@ -292,8 +292,9 @@
 <script>
 /* ===================== НАСТРОЙКИ ===================== */
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbw0v_OBpiFDFsIB7UAk0IzDLr5O9v5A0kJQj0xUBku0cqP2ZVrZYuZnM60Ie2yNsHsdig/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbxnEG6__3n7luiYfEsabnRUdm4qR2jcV8tVTccpLkLV0v-dvqTtuIyKwMnu1AgYKr81/exec",
 };
+const DOWNTIME_LABEL = "Производственный простой";
  
 /* ===================== ПРОФИЛЬ (localStorage) ===================== */
 const PROFILE_KEY = "pe_profile_v1";
@@ -338,7 +339,7 @@ let step = profile ? "date" : "register";
 let data = {
   date: todayStr(), orderNumber:"", orderLabel:"",
   equipment:"", operation:"", duration:"",
-  requestId: null,
+  requestId: null, isDowntime: false,
 };
 let opsCount = 0;
  
@@ -392,7 +393,7 @@ function setNav(title){
   }
   navTitle.textContent = title;
   navTitle.classList.add("show");
-  const target = BACK_MAP[step];
+  const target = (step === "time" && data.isDowntime) ? "order" : BACK_MAP[step];
   navBack.style.display = target ? "flex" : "none";
   navBack.onclick = () => target && goTo(target);
   navProfile.style.display = "flex";
@@ -570,16 +571,32 @@ function renderOrder(wrap){
   const card = document.createElement("div"); card.className = "card";
   (ordersData || []).forEach(o => {
     const row = document.createElement("div");
-    row.className = "row tappable" + (data.orderNumber === o.number ? " selected" : "");
+    row.className = "row tappable" + (!data.isDowntime && data.orderNumber === o.number ? " selected" : "");
     row.innerHTML = `<span class="row-label">${escapeHtml(o.label)}</span><span class="row-check">${checkSvg()}</span>`;
     row.onclick = () => {
       data.orderNumber = o.number;
       data.orderLabel = o.label;
       data.equipment = "";
+      data.operation = "";
+      data.isDowntime = false;
       goTo("order");
     };
     card.appendChild(row);
   });
+ 
+  const downtimeRow = document.createElement("div");
+  downtimeRow.className = "row tappable" + (data.isDowntime ? " selected" : "");
+  downtimeRow.innerHTML = `<span class="row-label">Производственный простой</span><span class="row-check">${checkSvg()}</span>`;
+  downtimeRow.onclick = () => {
+    data.orderNumber = DOWNTIME_LABEL;
+    data.orderLabel = DOWNTIME_LABEL;
+    data.equipment = "-";
+    data.operation = "-";
+    data.isDowntime = true;
+    goTo("order");
+  };
+  card.appendChild(downtimeRow);
+ 
   wrap.appendChild(card);
  
   if (!ordersData || ordersData.length === 0){
@@ -589,7 +606,10 @@ function renderOrder(wrap){
     wrap.appendChild(hint);
   }
  
-  primaryBtn("Далее", () => { if (data.orderNumber) goTo("equipment"); }, !data.orderNumber);
+  primaryBtn("Далее", () => {
+    if (!data.orderNumber) return;
+    goTo(data.isDowntime ? "time" : "equipment");
+  }, !data.orderNumber);
 }
  
 /* ---- Оборудование (список зависит от выбранного заказа) ---- */
@@ -803,11 +823,11 @@ function renderDone(wrap){
  
   secondaryBtn("Ещё операция", () => {
     data.orderNumber=""; data.orderLabel=""; data.equipment="";
-    data.operation=""; data.duration=""; data.requestId=null;
+    data.operation=""; data.duration=""; data.requestId=null; data.isDowntime=false;
     goTo("order");
   });
   primaryBtn("Завершить", () => {
-    data = { date: todayStr(), orderNumber:"", orderLabel:"", equipment:"", operation:"", duration:"", requestId:null };
+    data = { date: todayStr(), orderNumber:"", orderLabel:"", equipment:"", operation:"", duration:"", requestId:null, isDowntime:false };
     opsCount = 0;
     goTo("date");
   });
