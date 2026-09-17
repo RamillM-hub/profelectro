@@ -49,7 +49,7 @@
     position:relative;
     overflow:hidden;
   }
-
+ 
   .navbar{
     position:sticky; top:0; z-index:20;
     padding-top:env(safe-area-inset-top,0px);
@@ -106,7 +106,7 @@
   }
   .progress-track{height:2.5px;background:var(--separator);position:relative;overflow:hidden;}
   .progress-fill{height:100%;background:var(--accent);transition:width .35s cubic-bezier(.4,0,.2,1);}
-
+ 
   main{flex:1;overflow-y:auto;padding:0 16px 20px;-webkit-overflow-scrolling:touch;}
   .brand-row{
     display:flex; align-items:center; gap:9px;
@@ -134,14 +134,14 @@
     padding:2px 4px 18px;
     line-height:1.4;
   }
-
+ 
   .step-wrap{animation:iosIn .32s cubic-bezier(.22,1,.36,1);}
   @media (prefers-reduced-motion:reduce){ .step-wrap{animation:none;} }
   @keyframes iosIn{
     from{opacity:0; transform:translateY(10px);}
     to{opacity:1; transform:translateY(0);}
   }
-
+ 
   .group-label{
     font-size:13px;
     text-transform:uppercase;
@@ -178,7 +178,7 @@
   .row-check svg{width:22px;height:22px;display:none;}
   .row.selected .row-check svg{display:block;}
   .row.selected .row-label{color:var(--accent);font-weight:590;}
-
+ 
   .field-card{padding:10px 16px 12px;}
   .field-cap{font-size:13px;color:var(--secondary);margin-bottom:2px;}
   input[type=text], input[type=number], textarea{
@@ -194,10 +194,10 @@
   textarea{resize:none;min-height:66px;line-height:1.35;}
   input::placeholder, textarea::placeholder{color:var(--tertiary);}
   .hint{font-size:12.5px;color:var(--secondary);padding:8px 4px 0;line-height:1.4;}
-
+ 
   .review-row .k{font-size:15px;color:var(--secondary);}
   .review-row .v{font-size:15px;color:var(--label);font-weight:590;text-align:right;max-width:60%;}
-
+ 
   .center-msg{display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 16px 12px;gap:14px;}
   .check-badge{
     width:64px;height:64px;border-radius:50%;
@@ -209,10 +209,10 @@
   .check-badge svg{width:30px;height:30px;}
   .center-msg h2{font-size:22px;font-weight:700;letter-spacing:-0.01em;color:var(--label);}
   .center-msg p{font-size:14.5px;color:var(--secondary);line-height:1.5;max-width:280px;}
-
+ 
   .loading-rows{display:flex;align-items:center;gap:10px;color:var(--secondary);font-size:14.5px;padding:16px 4px;}
   .retry-link{color:var(--accent);font-weight:600;background:none;border:none;font-size:14.5px;padding:10px 4px;}
-
+ 
   footer{
     padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
     background:rgba(242,242,247,0.78);
@@ -240,14 +240,14 @@
   .btn-primary:disabled{background:var(--tertiary);}
   .btn-secondary{background:rgba(120,120,128,0.12);color:var(--accent);}
   .btn-plain{background:none;color:var(--secondary);padding:6px;font-size:13.5px;font-weight:500;}
-
+ 
   .error-banner{
     background:#FFEBEA;color:var(--danger);font-size:13px;
     border-radius:10px;padding:10px 12px;margin-top:14px;display:none;
     text-align:center;
   }
   .error-banner.show{display:block;}
-
+ 
   .spinner{
     width:16px;height:16px;border-radius:50%;
     border:2px solid rgba(255,255,255,0.45);border-top-color:#fff;
@@ -255,7 +255,7 @@
   }
   .spinner-dark{border:2px solid var(--separator);border-top-color:var(--accent);}
   @keyframes spin{to{transform:rotate(360deg);}}
-
+ 
   .crash{padding:34px 4px;}
   .crash h2{font-size:22px;font-weight:700;margin-bottom:10px;}
   .crash p{font-size:14.5px;color:var(--secondary);line-height:1.5;margin-bottom:16px;}
@@ -267,7 +267,7 @@
 </style>
 </head>
 <body>
-
+ 
 <div id="app">
   <div class="navbar">
     <div class="navbar-inner">
@@ -283,21 +283,21 @@
     </div>
     <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
-
+ 
   <main id="mainArea"></main>
-
+ 
   <footer id="footerArea"></footer>
 </div>
-
+ 
 <script>
 /* ===================== НАСТРОЙКИ ===================== */
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbyXFEkhqAxq3RjeKf--tclriYvXy18AzqPS_d9Wc9iWP_1jGpVzeKj40mz0i9pxaN_F/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbz1NTJnmwd8LzDsk4sMW5AY_-e1yJ2KHJlGTlMqnQrQHGs0IhP9G_1Re6dopA1bS-zidA/exec",
 };
-
-/* ===================== ПРОФИЛЬ (localStorage) ========+============= */
+ 
+/* ===================== ПРОФИЛЬ (localStorage) ===================== */
 const PROFILE_KEY = "pe_profile_v1";
-
+ 
 function loadProfile(){
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
@@ -315,7 +315,16 @@ function loadProfile(){
 function saveProfile(p){
   try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch(e){}
 }
-
+ 
+function abbreviateFio(full){
+  const parts = (full || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0];
+  const surname = parts[0];
+  const initials = parts.slice(1, 3).map(p => p[0].toUpperCase() + ".").join("");
+  return `${surname} ${initials}`;
+}
+ 
 let profile = loadProfile();
 let previousStep = "date";
 let lastWasQueued = false;
@@ -323,7 +332,7 @@ function makeRequestId(){
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 }
-
+ 
 /* ===================== СОСТОЯНИЕ ===================== */
 let step = profile ? "date" : "register";
 let data = {
@@ -332,36 +341,36 @@ let data = {
   requestId: null,
 };
 let opsCount = 0;
-
+ 
 /* Список заказов, полученный с сервера. Кэшируем на время сессии. */
 let ordersData = null;      // null = ещё не загружали
 let ordersError = null;
 let ordersLoading = false;
-
+ 
 function todayStr(){
   const d = new Date();
   const pad = n => String(n).padStart(2,"0");
   return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
 }
-
+ 
 const mainArea = document.getElementById("mainArea");
 const footerArea = document.getElementById("footerArea");
 const navTitle = document.getElementById("navTitle");
 const navBack = document.getElementById("navBack");
 const navProfile = document.getElementById("navProfile");
 const progressFill = document.getElementById("progressFill");
-
+ 
 navProfile.onclick = () => { previousStep = step; goTo("profile"); };
-
+ 
 const PROGRESS_STEPS = ["date","order","equipment","operation","time"];
 const BACK_MAP = { order:"date", equipment:"order",
   operation:"equipment", time:"operation", confirm:"time" };
-
+ 
 function progressIndex(){
   if (step === "confirm") return PROGRESS_STEPS.length - 1;
   return PROGRESS_STEPS.indexOf(step);
 }
-
+ 
 function setNav(title){
   if (step === "register"){
     navTitle.classList.remove("show"); navBack.style.display = "none";
@@ -390,9 +399,9 @@ function setNav(title){
   const idx = progressIndex();
   progressFill.style.width = ((idx+1)/PROGRESS_STEPS.length*100) + "%";
 }
-
+ 
 function goTo(next){ step = next; render(); mainArea.scrollTop = 0; }
-
+ 
 /* ===================== РЕНДЕР ===================== */
 function render(){
   mainArea.innerHTML = "";
@@ -400,7 +409,7 @@ function render(){
   const wrap = document.createElement("div");
   wrap.className = "step-wrap";
   mainArea.appendChild(wrap);
-
+ 
   if (step === "register") return renderRegister(wrap);
   if (step === "profile") return renderProfile(wrap);
   if (step === "date") return renderDate(wrap);
@@ -411,14 +420,14 @@ function render(){
   if (step === "confirm") return renderConfirm(wrap);
   if (step === "done") return renderDone(wrap);
 }
-
+ 
 function brandRow(wrap){
   const b = document.createElement("div");
   b.className = "brand-row";
   b.innerHTML = '<img class="logo-mark" src="./icons/icon-192.png" alt=""><span>ПрофЭлектро</span>';
   wrap.appendChild(b);
 }
-
+ 
 function largeTitle(wrap, title, sub){
   const h = document.createElement("div");
   h.className = "large-title";
@@ -431,7 +440,7 @@ function largeTitle(wrap, title, sub){
     wrap.appendChild(s);
   }
 }
-
+ 
 function fieldCard(wrap, caption, inputEl){
   const card = document.createElement("div");
   card.className = "card field-card";
@@ -443,11 +452,11 @@ function fieldCard(wrap, caption, inputEl){
   wrap.appendChild(card);
   return inputEl;
 }
-
+ 
 function checkSvg(){
   return '<svg viewBox="0 0 24 24" fill="none"><path d="M6 12.5L10 16.5L18 8" stroke="#2E9FD6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
-
+ 
 function primaryBtn(label, onClick, disabled){
   const btn = document.createElement("button");
   btn.className = "btn btn-primary";
@@ -465,7 +474,7 @@ function secondaryBtn(label, onClick){
   footerArea.appendChild(btn);
   return btn;
 }
-
+ 
 /* ---- Регистрация (один раз) ---- */
 function renderRegister(wrap){
   setNav("");
@@ -493,7 +502,7 @@ function renderRegister(wrap){
   });
   setTimeout(()=>fioInput.focus(), 250);
 }
-
+ 
 /* ---- Профиль (просмотр/редактирование) ---- */
 function renderProfile(wrap){
   setNav("Профиль");
@@ -515,7 +524,7 @@ function renderProfile(wrap){
     goTo(previousStep || "done");
   });
 }
-
+ 
 /* ---- Дата ---- */
 function renderDate(wrap){
   setNav("Дата");
@@ -530,13 +539,13 @@ function renderDate(wrap){
     goTo("order");
   });
 }
-
+ 
 /* ---- Номер заказа (список из Google Таблицы) ---- */
 function renderOrder(wrap){
   setNav(opsCount === 0 ? "Номер заказа" : `Операция №${opsCount+1}`);
   brandRow(wrap);
   largeTitle(wrap, "Номер заказа", "Выберите заказ из списка");
-
+ 
   if (ordersLoading){
     const l = document.createElement("div");
     l.className = "loading-rows";
@@ -544,7 +553,7 @@ function renderOrder(wrap){
     wrap.appendChild(l);
     return;
   }
-
+ 
   if (ordersError){
     const l = document.createElement("div");
     l.className = "hint";
@@ -557,7 +566,7 @@ function renderOrder(wrap){
     wrap.appendChild(retry);
     return;
   }
-
+ 
   const card = document.createElement("div"); card.className = "card";
   (ordersData || []).forEach(o => {
     const row = document.createElement("div");
@@ -572,26 +581,26 @@ function renderOrder(wrap){
     card.appendChild(row);
   });
   wrap.appendChild(card);
-
+ 
   if (!ordersData || ordersData.length === 0){
     const hint = document.createElement("div");
     hint.className = "hint";
     hint.textContent = "Список пуст — либо все заказы скрыты, либо в таблице нет данных.";
     wrap.appendChild(hint);
   }
-
+ 
   primaryBtn("Далее", () => { if (data.orderNumber) goTo("equipment"); }, !data.orderNumber);
 }
-
+ 
 /* ---- Оборудование (список зависит от выбранного заказа) ---- */
 function renderEquipment(wrap){
   setNav("Оборудование");
   brandRow(wrap);
   largeTitle(wrap, "Оборудование", data.orderLabel);
-
+ 
   const order = (ordersData || []).find(o => o.number === data.orderNumber);
   const list = order ? order.equipment : [];
-
+ 
   const card = document.createElement("div"); card.className = "card";
   list.forEach(name => {
     const row = document.createElement("div");
@@ -601,10 +610,10 @@ function renderEquipment(wrap){
     card.appendChild(row);
   });
   wrap.appendChild(card);
-
+ 
   primaryBtn("Далее", () => { if (data.equipment) goTo("operation"); }, !data.equipment);
 }
-
+ 
 /* ---- Операция ---- */
 function renderOperation(wrap){
   setNav("Операция");
@@ -620,7 +629,7 @@ function renderOperation(wrap){
   });
   setTimeout(()=>input.focus(), 250);
 }
-
+ 
 /* ---- Время выполнения ---- */
 function renderTime(wrap){
   setNav("Время");
@@ -636,14 +645,14 @@ function renderTime(wrap){
   });
   setTimeout(()=>input.focus(), 250);
 }
-
+ 
 /* ---- Подтверждение ---- */
 function renderConfirm(wrap){
   setNav("Проверка");
   brandRow(wrap);
   largeTitle(wrap, "Проверьте данные", "Перед отправкой в таблицу");
   const card = document.createElement("div"); card.className = "card";
-  [["ФИО", profile.fio],["Дата", data.date],["Номер заказа", data.orderLabel || data.orderNumber],
+  [["ФИО", abbreviateFio(profile.fio)],["Должность", profile.position],["Дата", data.date],["Номер заказа", data.orderLabel || data.orderNumber],
    ["Оборудование", data.equipment],["Операция", data.operation],["Время выполнения", data.duration]]
   .forEach(([k,v]) => {
     const row = document.createElement("div"); row.className = "row review-row";
@@ -651,15 +660,15 @@ function renderConfirm(wrap){
     card.appendChild(row);
   });
   wrap.appendChild(card);
-
+ 
   const errorBanner = document.createElement("div");
   errorBanner.className = "error-banner"; errorBanner.id = "errorBanner";
   errorBanner.textContent = "Не удалось сохранить после нескольких попыток. Проверьте связь и попробуйте ещё раз.";
   wrap.appendChild(errorBanner);
-
+ 
   const btn = primaryBtn("Отправить", () => submitRow(btn));
 }
-
+ 
 async function attemptSend(payload, timeoutMs){
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs || 8000);
@@ -680,9 +689,9 @@ async function attemptSend(payload, timeoutMs){
     throw e;
   }
 }
-
+ 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
+ 
 /* ---------- Офлайн-очередь ---------- */
 const QUEUE_KEY = "pe_pending_queue_v1";
 function loadQueue(){
@@ -723,26 +732,27 @@ function updatePendingBadge(){
 window.addEventListener("online", flushQueue);
 window.addEventListener("load", flushQueue);
 setInterval(() => { if (navigator.onLine) flushQueue(); }, 25000);
-
+ 
 function escapeHtml(str){ const d=document.createElement("div"); d.textContent=str; return d.innerHTML; }
-
+ 
 async function submitRow(btn){
   const errorBanner = document.getElementById("errorBanner");
   errorBanner.classList.remove("show");
   const originalLabel = btn.textContent;
   btn.disabled = true;
-
+ 
   if (!data.requestId) data.requestId = makeRequestId();
   const payload = {
     requestId: data.requestId,
-    fio: profile.fio,
+    fio: abbreviateFio(profile.fio),
+    position: profile.position,
     date: data.date,
     orderNumber: data.orderNumber,
     equipment: data.equipment,
     operation: data.operation,
     duration: data.duration,
   };
-
+ 
   const DELAYS = [0, 1200, 2500, 4500];
   for (let i = 0; i < DELAYS.length; i++){
     if (DELAYS[i] > 0){ await sleep(DELAYS[i]); }
@@ -755,7 +765,7 @@ async function submitRow(btn){
       return;
     } catch (e) { /* пробуем ещё раз */ }
   }
-
+ 
   if (!navigator.onLine) {
     enqueuePending(payload);
     data.requestId = null;
@@ -767,7 +777,7 @@ async function submitRow(btn){
     btn.disabled = false; btn.textContent = originalLabel;
   }
 }
-
+ 
 /* ---- Готово ---- */
 function renderDone(wrap){
   setNav("");
@@ -784,13 +794,13 @@ function renderDone(wrap){
     <p>Заказ ${escapeHtml(data.orderLabel || data.orderNumber)} сохранён в таблице. Есть ещё операции по этому заказ-наряду?</p>
   `;
   wrap.appendChild(msg);
-
+ 
   const profileLink = document.createElement("button");
   profileLink.className = "btn btn-plain";
   profileLink.textContent = `Профиль: ${profile.fio} · изменить`;
   profileLink.onclick = () => { previousStep = "done"; goTo("profile"); };
   wrap.appendChild(profileLink);
-
+ 
   secondaryBtn("Ещё операция", () => {
     data.orderNumber=""; data.orderLabel=""; data.equipment="";
     data.operation=""; data.duration=""; data.requestId=null;
@@ -802,7 +812,7 @@ function renderDone(wrap){
     goTo("date");
   });
 }
-
+ 
 /* ===================== ЗАГРУЗКА ЗАКАЗОВ ===================== */
 async function loadOrders(force){
   if (ordersLoading) return;
@@ -810,7 +820,7 @@ async function loadOrders(force){
   ordersLoading = true;
   ordersError = null;
   if (step === "order") render();
-
+ 
   try {
     const url = CONFIG.API_URL + (CONFIG.API_URL.indexOf("?") === -1 ? "?" : "&") + "action=orders";
     const res = await fetch(url, { method: "GET" });
@@ -825,7 +835,7 @@ async function loadOrders(force){
     if (step === "order") render();
   }
 }
-
+ 
 /* ===================== АВАРИЙНЫЙ ЭКРАН ===================== */
 function showCrash(err){
   try {
@@ -841,13 +851,13 @@ function showCrash(err){
     `;
     box.querySelector("pre").textContent = details;
     mainArea.appendChild(box);
-
+ 
     const reset = document.createElement("button");
     reset.className = "btn btn-primary";
     reset.textContent = "Сбросить данные и перезагрузить";
     reset.onclick = hardReset;
     footerArea.appendChild(reset);
-
+ 
     const reloadOnly = document.createElement("button");
     reloadOnly.className = "btn btn-secondary";
     reloadOnly.textContent = "Просто перезагрузить";
@@ -859,7 +869,7 @@ function showCrash(err){
       'Очистите данные сайта в настройках браузера и откройте страницу заново.</div>';
   }
 }
-
+ 
 async function hardReset(){
   try { localStorage.removeItem(PROFILE_KEY); } catch(_){}
   try { localStorage.removeItem(QUEUE_KEY); } catch(_){}
@@ -875,10 +885,10 @@ async function hardReset(){
   } catch(_){}
   location.replace(location.pathname + "?reset=" + Date.now());
 }
-
+ 
 window.addEventListener("error", (e) => { showCrash(e.error || e.message); });
 window.addEventListener("unhandledrejection", (e) => { showCrash(e.reason); });
-
+ 
 /* ===================== СТАРТ ===================== */
 try {
   render();
@@ -886,7 +896,7 @@ try {
 } catch (err) {
   showCrash(err);
 }
-
+ 
 /* ===================== SERVICE WORKER ===================== */
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   navigator.serviceWorker.register("./sw.js", { scope: "./" })
@@ -896,3 +906,4 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 </script>
 </body>
 </html>
+ 
